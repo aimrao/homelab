@@ -1,0 +1,74 @@
+version: "3"
+services:
+  influxdb:
+    container_name: influxdb
+    image: influxdb:2
+    ports:
+      - '8086:8086'
+    volumes:
+      - /opt/monitoring/influxdb/data:/var/lib/influxdb2
+      - /opt/monitoring/influxdb/config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=username
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password
+      - DOCKER_INFLUXDB_INIT_ORG=homelab
+      - DOCKER_INFLUXDB_INIT_BUCKET=proxmox
+      - DOCKER_INFLUXDB_INIT_RETENTION=30d
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+  
+  node-exporter:
+    container_name: node-exporter
+    image: quay.io/prometheus/node-exporter
+    network_mode: "host"
+    ports:
+      - "9100:9100"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    user: root
+    network_mode: "host"
+    ports:
+      - "9090:9090"
+    volumes: 
+      - "/opt/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    privileged: true
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    network_mode: "host"
+    ports:
+      - "3000:3000"
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Kolkata
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - DS_PROMETHEUS=prometheus
+    volumes: 
+      - "/opt/monitoring/grafana/data:/var/lib/grafana"
+      - "/opt/monitoring/grafana/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml"
+      - "/opt/monitoring/grafana/dashboards:/var/lib/grafana/dashboards"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    privileged: true

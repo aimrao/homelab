@@ -1,0 +1,18 @@
+version: '3'
+services:
+  homarr:
+    container_name: homarr
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
+      - /opt/homarr/configs:/app/data/configs
+      - /opt/homarr/icons:/app/public/icons
+      - /opt/homarr/data:/data
+    ports:
+      - '7575:7575'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

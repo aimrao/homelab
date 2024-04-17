@@ -1,0 +1,134 @@
+---
+version: "3"
+
+services:
+  prowlarr: 
+    image: linuxserver/prowlarr:latest 
+    container_name: prowlarr
+    ports:
+      - 9117:9117 # Prowlarr
+      - 9696:9696 # prowlarr
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes: 
+      - /data/configs/prowlarr:/config
+      - /data/media:/mnt/media
+      - /data/media/Downloads:/mnt/downloads
+    depends_on:
+      - flaresolverr
+    environment:
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
+
+  flaresolverr: 
+    image: ghcr.io/flaresolverr/flaresolverr:latest 
+    container_name: flaresolverr
+    ports:
+      - 8191:8191 # flaresolverr
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    environment: 
+      - LOG_LEVEL=${LOG_LEVEL:-info} 
+      - LOG_HTML=${LOG_HTML:-false} 
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
+
+  qbittorrent: 
+    image: lscr.io/linuxserver/qbittorrent:latest 
+    container_name: qbittorrent
+    ports:
+      - 6881:6881 # qbittorrent
+      - 6881:6881/udp # qbittorrent
+      - 8081:8081 # qbittorrent
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes: 
+      - /data/configs/qbittorrent:/config
+      - /data/media/Downloads:/mnt/downloads
+    environment:
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - WEBUI_PORT=8081
+    restart: unless-stopped
+ 
+  radarr: 
+    image: lscr.io/linuxserver/radarr:latest 
+    container_name: radarr
+    ports:
+      - 7878:7878 # Radarr
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes: 
+      - /data/configs/radarr:/config
+      - /data/media:/mnt/media
+      - /data/media/Downloads:/mnt/downloads
+    depends_on:
+      - prowlarr 
+      - qbittorrent
+    environment:
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
+
+  readarr: 
+    image: lscr.io/linuxserver/readarr:develop 
+    container_name: readarr
+    ports:
+      - 8787:8787 # Readarr
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes: 
+      - /data/configs/readarr:/config
+      - /data/media:/mnt/media
+      - /data/media/Downloads:/mnt/downloads
+    depends_on:
+      - prowlarr 
+      - qbittorrent
+    environment:
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
+
+  sonarr: 
+    image: lscr.io/linuxserver/sonarr:latest 
+    container_name: sonarr
+    ports:
+      - 8989:8989 # Sonarr
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes: 
+      - /data/configs/sonarr:/config
+      - /data/media:/mnt/media
+      - /data/media/Downloads:/mnt/downloads
+    depends_on:
+      - prowlarr
+      - qbittorrent
+    environment:
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
+
+networks: 
+  arr-stack: 
+    driver: host
