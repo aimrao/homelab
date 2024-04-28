@@ -30,45 +30,45 @@ services:
       - 8989:8989 # Sonarr
     restart: unless-stopped
 
-  prowlarr: 
-    image: linuxserver/prowlarr:latest 
+  prowlarr:
+    image: linuxserver/prowlarr:latest
     container_name: prowlarr
     network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
         max-file: "3"
-    volumes: 
+    volumes:
       - /data/configs/prowlarr:/config
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
       - flaresolverr
     environment:
-      - PUID=1000 
+      - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
 
-  flaresolverr: 
-    image: ghcr.io/flaresolverr/flaresolverr:latest 
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
         max-file: "3"
-    environment: 
-      - LOG_LEVEL=${LOG_LEVEL:-info} 
-      - LOG_HTML=${LOG_HTML:-false} 
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
       - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - PUID=1000 
+      - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
 
-  qbittorrent: 
-    image: lscr.io/linuxserver/qbittorrent:latest 
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     ports:
       - 6881:6881/udp # qbittorrent
@@ -77,67 +77,67 @@ services:
       options:
         max-size: "5M"
         max-file: "3"
-    volumes: 
+    volumes:
       - /data/configs/qbittorrent:/config
       - /data/media/Downloads:/mnt/downloads
     environment:
-      - PUID=1000 
+      - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
       - WEBUI_PORT=8081
     restart: unless-stopped
- 
-  radarr: 
-    image: lscr.io/linuxserver/radarr:latest 
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
         max-file: "3"
-    volumes: 
+    volumes:
       - /data/configs/radarr:/config
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      - prowlarr 
+      - prowlarr
       - qbittorrent
     environment:
-      - PUID=1000 
+      - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
 
-  readarr: 
-    image: lscr.io/linuxserver/readarr:develop 
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
     container_name: readarr
     network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
         max-file: "3"
-    volumes: 
+    volumes:
       - /data/configs/readarr:/config
-      - /data/media:/mnt/media
+      - /data/books:/mnt/books
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      - prowlarr 
+      - prowlarr
       - qbittorrent
     environment:
-      - PUID=1000 
+      - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
 
-  sonarr: 
-    image: lscr.io/linuxserver/sonarr:latest 
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
         max-file: "3"
-    volumes: 
+    volumes:
       - /data/configs/sonarr:/config
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
@@ -145,7 +145,7 @@ services:
       - prowlarr
       - qbittorrent
     environment:
-      - PUID=1000 
+      - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
