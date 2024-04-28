@@ -2,12 +2,38 @@
 version: "3"
 
 services:
-  prowlarr: 
-    image: linuxserver/prowlarr:latest 
-    container_name: prowlarr
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - OPENVPN_USER=user
+      - OPENVPN_PASSWORD=pass
+      - SERVER_COUNTRIES=country
+      - FREE_ONLY=on
+      - VPN_PORT_FORWARDING=on
     ports:
       - 9117:9117 # Prowlarr
       - 9696:9696 # prowlarr
+      - 8191:8191 # flaresolverr
+      - 6881:6881 # qbittorrent
+      - 7878:7878 # Radarr
+      - 8787:8787 # Readarr
+      - 8989:8989 # Sonarr
+    restart: unless-stopped
+
+  prowlarr: 
+    image: linuxserver/prowlarr:latest 
+    container_name: prowlarr
+    network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
@@ -27,8 +53,7 @@ services:
   flaresolverr: 
     image: ghcr.io/flaresolverr/flaresolverr:latest 
     container_name: flaresolverr
-    ports:
-      - 8191:8191 # flaresolverr
+    network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
@@ -46,7 +71,6 @@ services:
     image: lscr.io/linuxserver/qbittorrent:latest 
     container_name: qbittorrent
     ports:
-      - 6881:6881 # qbittorrent
       - 6881:6881/udp # qbittorrent
       - 8081:8081 # qbittorrent
     logging:
@@ -66,8 +90,7 @@ services:
   radarr: 
     image: lscr.io/linuxserver/radarr:latest 
     container_name: radarr
-    ports:
-      - 7878:7878 # Radarr
+    network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
@@ -88,8 +111,7 @@ services:
   readarr: 
     image: lscr.io/linuxserver/readarr:develop 
     container_name: readarr
-    ports:
-      - 8787:8787 # Readarr
+    network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
@@ -110,8 +132,7 @@ services:
   sonarr: 
     image: lscr.io/linuxserver/sonarr:latest 
     container_name: sonarr
-    ports:
-      - 8989:8989 # Sonarr
+    network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
@@ -128,7 +149,3 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
-
-networks: 
-  arr-stack: 
-    driver: host
