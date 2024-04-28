@@ -149,3 +149,21 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     restart: unless-stopped
+
+  kavita:
+    image: jvmilazz0/kavita:latest
+    container_name: kavita
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes:
+      - /data/books:/mnt/books
+      - /data/configs/kavita:/kavita/config
+    ports:
+      - "5000:5000"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
