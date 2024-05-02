@@ -13,14 +13,14 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
+    volumes:
+      - /data/configs/wireguard/wg_confs/wg0.conf:/gluetun/wireguard/wg0.conf
     environment:
-      - VPN_SERVICE_PROVIDER=protonvpn
-      - OPENVPN_USER=user
-      - OPENVPN_PASSWORD=pass
-      - SERVER_COUNTRIES=country
-      - FREE_ONLY=on
-      - VPN_PORT_FORWARDING=on
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
     ports:
+      - 6881:6881/udp # qbittorrent
+      - 8081:8081 # qbittorrent
       - 9117:9117 # Prowlarr
       - 9696:9696 # prowlarr
       - 8191:8191 # flaresolverr
@@ -70,9 +70,7 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
-    ports:
-      - 6881:6881/udp # qbittorrent
-      - 8081:8081 # qbittorrent
+    network_mode: service:gluetun
     logging:
       options:
         max-size: "5M"
