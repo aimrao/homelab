@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Define qBittorrent Web UI credentials
-cookie=""
+cookie=$(curl -i -s --data 'username=admin&password=admin' http://localhost:8081/api/v2/auth/login | grep -oP 'set-cookie:\s*\K[^;]*')
 qb_url="http://localhost:8081"
 
 # Function to get the listen port from qBittorrent API
 get_listen_port() {
-    listen_port=$(curl "$qb_url/api/v2/app/preferences" --cookie $cookie | jq -r '.listen_port')
+    listen_port=$(curl -s "$qb_url/api/v2/app/preferences" --cookie $cookie | jq -r '.listen_port')
     echo "$listen_port"
 }
 
