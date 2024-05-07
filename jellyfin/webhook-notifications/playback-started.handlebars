@@ -1,0 +1,28 @@
+{
+    "content": "{{MentionType}}",
+    "avatar_url": "{{ServerUrl}}/Users/{{UserId}}/Images/Primary",
+    "username": "jellyfin",
+    "embeds": [
+        {
+            "author": {
+                {{#if_equals ItemType 'Episode'}}
+                    "name": "Playback Started • {{{SeriesName}}} S{{SeasonNumber00}}E{{EpisodeNumber00}} ~ {{{Name}}}",
+                {{else}}
+                    "name": "Playback Started • {{{Name}}} ({{Year}})",
+                {{/if_equals}}
+
+                "url": "{{ServerUrl}}/web/index.html#!/details?id={{ItemId}}&serverId={{ServerId}}"
+            },
+
+            "color": "3394611",
+
+            "description": "``[{{PlaybackPosition}}/{{RunTime}}]``",
+
+            "footer": {
+                "text": "{{{NotificationUsername}}}"
+            },
+
+            "timestamp": "{{Timestamp}}"
+        }
+    ]
+}

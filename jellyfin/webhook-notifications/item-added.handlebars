@@ -1,0 +1,28 @@
+{
+    "content": "{{MentionType}}",
+    "avatar_url": "{{ServerUrl}}/Users/{{UserId}}/Images/Primary",
+    "username": "jellyfin",
+    "embeds": [
+        {
+            "author": {
+                {{#if_equals ItemType 'Season'}}
+                    "name": "Season Added • {{{SeriesName}}} {{{Name}}}"
+                {{else}}
+                    {{#if_equals ItemType 'Episode'}}
+                        "name": "Episode Added • {{{SeriesName}}} S{{SeasonNumber00}}E{{EpisodeNumber00}} ~ {{{Name}}}"
+                    {{else}}
+                        {{#if_equals ItemType 'Movie'}}
+                            "name": "Movie Added • {{{Name}}}"
+                        {{else}}
+                            "name": "Content Added • {{{Name}}}"
+                        {{/if_equals}}
+                    {{/if_equals}}
+                {{/if_equals}}
+            },
+
+            "color": "3381759",
+
+            "timestamp": "{{Timestamp}}"
+        }
+    ]
+}
