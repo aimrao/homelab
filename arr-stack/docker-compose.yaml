@@ -2,6 +2,21 @@
 version: "3"
 
 services:
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    container_name: autoheal
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+      - AUTOHEAL_INTERVAL=10
+      - AUTOHEAL_START_PERIOD=180
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=30
+    restart: unless-stopped
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
@@ -9,17 +24,19 @@ services:
       options:
         max-size: "5M"
         max-file: "3"
+    volumes:
+      - /tmp/gluetun/forwarded_port:/tmp/gluetun/forwarded_port
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
-    volumes:
-      - /data/configs/wireguard/wg_confs/wg0.conf:/gluetun/wireguard/wg0.conf
     environment:
-      - VPN_SERVICE_PROVIDER=custom
-      - VPN_TYPE=wireguard
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - OPENVPN_USER=username
+      - OPENVPN_PASSWORD=password
+      - SERVER_COUNTRIES=country
+      - VPN_PORT_FORWARDING=on
     ports:
-      - 6881:6881/udp # qbittorrent
       - 8081:8081 # qbittorrent
       - 9117:9117 # Prowlarr
       - 9696:9696 # prowlarr
@@ -28,6 +45,7 @@ services:
       - 7878:7878 # Radarr
       - 8787:8787 # Readarr
       - 8989:8989 # Sonarr
+      - 6767:6767 # Bazarr
     restart: unless-stopped
 
   prowlarr:
@@ -43,11 +61,21 @@ services:
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      - flaresolverr
+      gluetun:
+        condition: service_started
+      flaresolverr:
+        condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
     restart: unless-stopped
 
   flaresolverr:
@@ -65,6 +93,16 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
+    depends_on:
+      gluetun:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
     restart: unless-stopped
 
   qbittorrent:
@@ -83,6 +121,16 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
       - WEBUI_PORT=8081
+    depends_on:
+      gluetun:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
     restart: unless-stopped
 
   radarr:
@@ -98,12 +146,19 @@ services:
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      - prowlarr
-      - qbittorrent
+      gluetun:
+        condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
     restart: unless-stopped
 
   readarr:
@@ -119,12 +174,19 @@ services:
       - /data/books:/mnt/books
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      - prowlarr
-      - qbittorrent
+      gluetun:
+        condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
     restart: unless-stopped
 
   sonarr:
@@ -140,12 +202,46 @@ services:
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      - prowlarr
-      - qbittorrent
+      gluetun:
+        condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    network_mode: service:gluetun
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    volumes:
+      - /data/configs/bazarr:/config
+      - /data/media:/mnt/media
+    depends_on:
+      gluetun:
+        condition: service_started
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ip.me"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      start_interval: 5s
     restart: unless-stopped
 
   kavita:
