@@ -25,17 +25,15 @@ services:
         max-size: "5M"
         max-file: "3"
     volumes:
+      - /data/configs/wireguard/wg_confs/wg0.conf:/gluetun/wireguard/wg0.conf
       - /tmp/gluetun/forwarded_port:/tmp/gluetun/forwarded_port
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
-      - VPN_SERVICE_PROVIDER=protonvpn
-      - OPENVPN_USER=username
-      - OPENVPN_PASSWORD=password
-      - SERVER_COUNTRIES=country
-      - VPN_PORT_FORWARDING=on
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
     ports:
       - 8081:8081 # qbittorrent
       - 9117:9117 # Prowlarr
