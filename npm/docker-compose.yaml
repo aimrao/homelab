@@ -1,13 +1,28 @@
-version: '3'
+version: "3"
 services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Asia/Kolkata
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_REMOVE_VOLUMES=true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
   npm:
     container_name: npm
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
+    image: "jc21/nginx-proxy-manager:latest"
     ports:
-      - '80:80' # Public HTTP Port
-      - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
+      - "80:80" # Public HTTP Port
+      - "443:443" # Public HTTPS Port
+      - "81:81" # Admin Web Port
     volumes:
       - /opt/npm/data:/data
       - /opt/npm/letsencrypt:/etc/letsencrypt
@@ -16,3 +31,4 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    restart: unless-stopped

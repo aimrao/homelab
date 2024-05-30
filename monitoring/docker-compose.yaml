@@ -1,10 +1,26 @@
 version: "3"
 services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Asia/Kolkata
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_REMOVE_VOLUMES=true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
   influxdb:
     container_name: influxdb
     image: influxdb:2
     ports:
-      - '8086:8086'
+      - "8086:8086"
     volumes:
       - /opt/monitoring/influxdb/data:/var/lib/influxdb2
       - /opt/monitoring/influxdb/config:/etc/influxdb2
@@ -21,7 +37,7 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
-  
+
   node-exporter:
     container_name: node-exporter
     image: quay.io/prometheus/node-exporter
@@ -41,7 +57,7 @@ services:
     network_mode: "host"
     ports:
       - "9090:9090"
-    volumes: 
+    volumes:
       - "/opt/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
     logging:
       driver: "json-file"
@@ -62,7 +78,7 @@ services:
       - TZ=Asia/Kolkata
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - DS_PROMETHEUS=prometheus
-    volumes: 
+    volumes:
       - "/opt/monitoring/grafana/data:/var/lib/grafana"
       - "/opt/monitoring/grafana/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml"
       - "/opt/monitoring/grafana/dashboards:/var/lib/grafana/dashboards"
