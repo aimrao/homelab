@@ -150,7 +150,7 @@ services:
     restart: always
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
+    image: flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     network_mode: service:vpn
     logging:
@@ -177,7 +177,7 @@ services:
     restart: always
 
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: linuxserver/qbittorrent:latest
     container_name: qbittorrent
     network_mode: service:vpn
     logging:
@@ -205,7 +205,7 @@ services:
     restart: always
 
   radarr:
-    image: lscr.io/linuxserver/radarr:latest
+    image: linuxserver/radarr:latest
     container_name: radarr
     network_mode: service:vpn
     logging:
@@ -233,7 +233,7 @@ services:
     restart: always
 
   readarr:
-    image: lscr.io/linuxserver/readarr:develop
+    image: linuxserver/readarr:develop
     container_name: readarr
     network_mode: service:vpn
     logging:
@@ -261,7 +261,7 @@ services:
     restart: always
 
   sonarr:
-    image: lscr.io/linuxserver/sonarr:latest
+    image: linuxserver/sonarr:latest
     container_name: sonarr
     network_mode: service:vpn
     logging:
@@ -289,7 +289,7 @@ services:
     restart: always
 
   bazarr:
-    image: lscr.io/linuxserver/bazarr:latest
+    image: linuxserver/bazarr:latest
     container_name: bazarr
     network_mode: service:vpn
     logging:
