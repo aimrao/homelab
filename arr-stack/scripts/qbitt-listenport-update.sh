@@ -1,8 +1,11 @@
 #!/bin/bash
 
 # Define qBittorrent Web UI credentials
-cookie=$(curl -i -s --data 'username=admin&password=admin' http://localhost:8081/api/v2/auth/login | grep -oP 'set-cookie:\s*\K[^;]*')
+cookie=$(curl -i -s http://localhost:8081/api/v2/auth/login | grep -oP 'set-cookie:\s*\K[^;]*')
+# I have disabled auth for localhost connections so no need to pass creds, however if you want to pass creds uncomment the below line to get cookie.
+# cookie=$(curl -i -s --data 'username=admin&password=admin' http://localhost:8081/api/v2/auth/login | grep -oP 'set-cookie:\s*\K[^;]*')
 qb_url="http://localhost:8081"
+forwarded_port_file="/vpn/forwarded_port"
 
 # Function to get the listen port from qBittorrent API
 get_listen_port() {
@@ -12,11 +15,11 @@ get_listen_port() {
 
 # Function to get the forwarded port from the file
 get_forwarded_port() {
-    if [ -f "/tmp/gluetun/forwarded_port" ]; then
-        forwarded_port=$(cat "/tmp/gluetun/forwarded_port")
+    if [ -f "$forwarded_port_file" ]; then
+        forwarded_port=$(cat "$forwarded_port_file")
         echo "$forwarded_port"
     else
-        echo "File /tmp/gluetun/forwarded_port not found."
+        echo "File $forwarded_port_file not found."
         exit 1
     fi
 }

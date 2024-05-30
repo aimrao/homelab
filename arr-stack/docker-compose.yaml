@@ -5,6 +5,8 @@ services:
   autoheal:
     image: willfarrell/autoheal:1.2.0
     container_name: autoheal
+    networks:
+      - arr-stack
     logging:
       options:
         max-size: "5M"
@@ -13,43 +15,114 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - AUTOHEAL_CONTAINER_LABEL=all
-      - AUTOHEAL_INTERVAL=10
-      - AUTOHEAL_START_PERIOD=180
-      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=30
-    restart: unless-stopped
-  gluetun:
-    image: qmcgaw/gluetun
-    container_name: gluetun
+      - AUTOHEAL_INTERVAL=5
+      - AUTOHEAL_START_PERIOD=30
+      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=10
+    restart: always
+
+  vpn:
+    image: thrnz/docker-wireguard-pia
+    container_name: vpn
+    networks:
+      - arr-stack
     logging:
       options:
         max-size: "5M"
         max-file: "3"
     volumes:
-      - /data/configs/wireguard/wg_confs/wg0.conf:/gluetun/wireguard/wg0.conf
-      - /tmp/gluetun/forwarded_port:/tmp/gluetun/forwarded_port
+      - /vpn/forwarded_port:/pia-shared/port.dat
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
-      - VPN_SERVICE_PROVIDER=custom
-      - VPN_TYPE=wireguard
+      - LOC=[REDACTED]
+      - USER=[REDACTED]
+      - PASS=[REDACTED]
+      - LOCAL_NETWORK=192.168.0.0/24
+      - PORT_FORWARDING=1
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.default.disable_ipv6=1
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv6.conf.lo.disable_ipv6=1
     ports:
+      - 80:80 # speedtest-vpn
       - 8081:8081 # qbittorrent
       - 9117:9117 # Prowlarr
       - 9696:9696 # prowlarr
       - 8191:8191 # flaresolverr
-      - 6881:6881 # qbittorrent
       - 7878:7878 # Radarr
       - 8787:8787 # Readarr
       - 8989:8989 # Sonarr
       - 6767:6767 # Bazarr
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 5s
+    restart: always
+
+  speedtest-vpn:
+    container_name: speedtest-vpn
+    image: henrywhitaker3/speedtest-tracker
+    network_mode: service:vpn
+    volumes:
+      - /config/speedtest-vpn:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - OOKLA_EULA_GDPR=true
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    depends_on:
+      vpn:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 5s
+    restart: always
+
+  speedtest:
+    container_name: speedtest
+    image: henrywhitaker3/speedtest-tracker
+    networks:
+      - arr-stack
+    ports:
+      - 81:80
+    volumes:
+      - /config/speedtest:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - OOKLA_EULA_GDPR=true
+    logging:
+      options:
+        max-size: "5M"
+        max-file: "3"
+    healthcheck:
+      test: "curl -I www.example.org 2>/dev/null | head -n 1 | cut -d$' ' -f2"
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 5s
+    restart: always
 
   prowlarr:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -59,7 +132,7 @@ services:
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
       flaresolverr:
         condition: service_started
@@ -68,18 +141,18 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -92,21 +165,21 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -120,21 +193,21 @@ services:
       - TZ=Asia/Kolkata
       - WEBUI_PORT=8081
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -144,25 +217,25 @@ services:
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   readarr:
     image: lscr.io/linuxserver/readarr:develop
     container_name: readarr
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -172,25 +245,25 @@ services:
       - /data/books:/mnt/books
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -200,25 +273,25 @@ services:
       - /data/media:/mnt/media
       - /data/media/Downloads:/mnt/downloads
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
-    network_mode: service:gluetun
+    network_mode: service:vpn
     logging:
       options:
         max-size: "5M"
@@ -227,24 +300,26 @@ services:
       - /data/configs/bazarr:/config
       - /data/media:/mnt/media
     depends_on:
-      gluetun:
+      vpn:
         condition: service_started
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://ip.me"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
       start_period: 30s
       start_interval: 5s
-    restart: unless-stopped
+    restart: always
 
   kavita:
     image: jvmilazz0/kavita:latest
     container_name: kavita
+    networks:
+      - arr-stack
     logging:
       options:
         max-size: "5M"
@@ -258,4 +333,11 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-    restart: unless-stopped
+    restart: always
+
+networks:
+  arr-stack:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
