@@ -15,7 +15,7 @@ echo "Locale and terminal settings have been configured. Please restart your ter
 
 # Install required packages
 apt update && apt upgrade -y
-apt install ca-certificates curl sudo gdu tree wget htop telnet traceroute dnsutils tmux rsync -y
+apt install ca-certificates curl sudo gdu tree wget htop telnet traceroute dnsutils tmux rsync ufw -y
 
 # Node exporter
 curl -sSfL https://raw.githubusercontent.com/carlocorradini/node_exporter_installer/main/install.sh | sh -
