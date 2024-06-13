@@ -11,6 +11,9 @@ services:
       - TZ=Asia/Kolkata
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_REMOVE_VOLUMES=true
+      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=arr-stack
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
     logging:
       driver: "json-file"
       options:

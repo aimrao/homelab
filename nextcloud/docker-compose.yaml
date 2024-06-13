@@ -1,0 +1,91 @@
+version: "3"
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Asia/Kolkata
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_REMOVE_VOLUMES=true
+      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=nextcloud
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - /config/database:/var/lib/postgresql/data
+    environment:
+      - TZ=Asia/Kolkata
+      - POSTGRES_DB_FILE=/run/secrets/postgres_db
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    secrets:
+      - postgres_db
+      - postgres_password
+      - postgres_user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    ports:
+      - 80:80
+    volumes:
+      - /data:/var/www/html/data/admin/files
+      - /config/nextcloud/apps:/var/www/html/custom_apps
+      - /config/nextcloud/config:/var/www/html/config
+      - /config/nextcloud/theme:/var/www/html/themes/
+    environment:
+      - TZ=Asia/Kolkata
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB_FILE=/run/secrets/postgres_db
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
+      - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/nextcloud_admin_user
+      - TRUSTED_PROXIES=192.168.0.102
+      - OVERWRITECLIURL=http://192.168.0.102
+      - OVERWRITEPROTOCOL=http
+      - NEXTCLOUD_TRUSTED_DOMAINS=192.168.0.102
+      - OVERWRITEHOST=192.168.0.102
+    depends_on:
+      - postgres
+    secrets:
+      - nextcloud_admin_password
+      - nextcloud_admin_user
+      - postgres_db
+      - postgres_password
+      - postgres_user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+
+secrets:
+  nextcloud_admin_password:
+    file: /secrets/nextcloud_admin_password.txt # put admin password in this file
+  nextcloud_admin_user:
+    file: /secrets/nextcloud_admin_user.txt # put admin username in this file
+  postgres_db:
+    file: /secrets/postgres_db.txt # put postgresql db name in this file
+  postgres_password:
+    file: /secrets/postgres_password.txt # put postgresql password in this file
+  postgres_user:
+    file: /secrets/postgres_user.txt # put postgresql username in this file

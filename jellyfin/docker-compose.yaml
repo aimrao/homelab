@@ -9,7 +9,7 @@ services:
       - TZ=Asia/Kolkata
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_REMOVE_VOLUMES=true
-      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=npm
+      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=jellyfin
       - WATCHTOWER_NOTIFICATIONS=shoutrrr
       - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
     logging:
@@ -19,19 +19,26 @@ services:
         max-file: "3"
     restart: unless-stopped
 
-  npm:
-    container_name: npm
-    image: "jc21/nginx-proxy-manager:latest"
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
     ports:
-      - "80:80" # Public HTTP Port
-      - "443:443" # Public HTTPS Port
-      - "81:81" # Admin Web Port
+      - "8096:8096"
     volumes:
-      - /opt/npm/data:/data
-      - /opt/npm/letsencrypt:/etc/letsencrypt
+      - /data/config:/config
+      - /data/cache:/cache
+      - /data/movies:/movies
+      - /data/shows:/shows
+      - /data/events:/events
+    environment:
+      - TZ=Asia/Kolkata
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    restart: unless-stopped
+    devices:
+      - "/dev/dri/card0:/dev/dri/card0"
+      - "/dev/dri/renderD128:/dev/dri/renderD128"
+    privileged: true
+    restart: "unless-stopped"

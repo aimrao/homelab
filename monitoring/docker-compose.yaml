@@ -9,6 +9,9 @@ services:
       - TZ=Asia/Kolkata
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_REMOVE_VOLUMES=true
+      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=monitoring
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
     logging:
       driver: "json-file"
       options:
@@ -26,8 +29,8 @@ services:
       - /opt/monitoring/influxdb/config:/etc/influxdb2
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=username
-      - DOCKER_INFLUXDB_INIT_PASSWORD=password
+      - DOCKER_INFLUXDB_INIT_USERNAME=[REDACTED]
+      - DOCKER_INFLUXDB_INIT_PASSWORD=[REDACTED]
       - DOCKER_INFLUXDB_INIT_ORG=homelab
       - DOCKER_INFLUXDB_INIT_BUCKET=proxmox
       - DOCKER_INFLUXDB_INIT_RETENTION=30d
@@ -49,6 +52,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    restart: unless-stopped
 
   prometheus:
     container_name: prometheus
@@ -64,6 +68,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    restart: unless-stopped
     privileged: true
 
   grafana:
@@ -87,4 +92,5 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    restart: unless-stopped
     privileged: true
