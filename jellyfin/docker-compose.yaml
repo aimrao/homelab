@@ -30,6 +30,7 @@ services:
       - /data/movies:/movies
       - /data/shows:/shows
       - /data/events:/events
+      - /data/misc:/misc
     environment:
       - TZ=Asia/Kolkata
     logging:
