@@ -1,5 +1,0 @@
-[default]
-  url = "http://localhost:8086"
-  token = "[REDACTED]"
-  org = "homelab"
-  active = true

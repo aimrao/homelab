@@ -2,30 +2,9 @@
 version: "3"
 
 services:
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - TZ=Asia/Kolkata
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_REMOVE_VOLUMES=true
-      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=arr-stack
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: unless-stopped
-
   autoheal:
     image: willfarrell/autoheal:1.2.0
     container_name: autoheal
-    networks:
-      - arr-stack
     logging:
       options:
         max-size: "5M"
@@ -42,8 +21,6 @@ services:
   vpn:
     image: thrnz/docker-wireguard-pia
     container_name: vpn
-    networks:
-      - arr-stack
     logging:
       options:
         max-size: "5M"
@@ -66,13 +43,12 @@ services:
       - net.ipv6.conf.all.disable_ipv6=1
       - net.ipv6.conf.lo.disable_ipv6=1
     ports:
-      - 80:80 # speedtest-vpn
-      - 8081:8081 # qbittorrent
+      - 8090:80 # speedtest-vpn
+      - 8082:8082 # qbittorrent
       - 9117:9117 # Prowlarr
       - 9696:9696 # prowlarr
       - 8191:8191 # flaresolverr
       - 7878:7878 # Radarr
-      - 8787:8787 # Readarr
       - 8989:8989 # Sonarr
       - 6767:6767 # Bazarr
     healthcheck:
@@ -114,10 +90,8 @@ services:
   speedtest:
     container_name: speedtest
     image: henrywhitaker3/speedtest-tracker
-    networks:
-      - arr-stack
     ports:
-      - 81:80
+      - 8091:80
     volumes:
       - /config/speedtest:/config
     environment:
@@ -147,9 +121,9 @@ services:
         max-size: "5M"
         max-file: "3"
     volumes:
-      - /data/configs/prowlarr:/config
-      - /data/media:/mnt/media
-      - /data/media/Downloads:/mnt/downloads
+      - /tank/configs/arr-stack/prowlarr:/config
+      - /tank/data/media:/mnt/media
+      - /tank/data/media/downloads:/mnt/downloads
     depends_on:
       vpn:
         condition: service_started
@@ -204,13 +178,13 @@ services:
         max-size: "5M"
         max-file: "3"
     volumes:
-      - /data/configs/qbittorrent:/config
-      - /data/media/Downloads:/mnt/downloads
+      - /tank/configs/arr-stack/qbittorrent:/config
+      - /tank/data/media/downloads:/mnt/downloads
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-      - WEBUI_PORT=8081
+      - WEBUI_PORT=8082
     depends_on:
       vpn:
         condition: service_started
@@ -232,37 +206,9 @@ services:
         max-size: "5M"
         max-file: "3"
     volumes:
-      - /data/configs/radarr:/config
-      - /data/media:/mnt/media
-      - /data/media/Downloads:/mnt/downloads
-    depends_on:
-      vpn:
-        condition: service_started
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Asia/Kolkata
-    healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
-    restart: always
-
-  readarr:
-    image: linuxserver/readarr:develop
-    container_name: readarr
-    network_mode: service:vpn
-    logging:
-      options:
-        max-size: "5M"
-        max-file: "3"
-    volumes:
-      - /data/configs/readarr:/config
-      - /data/books:/mnt/books
-      - /data/media/Downloads:/mnt/downloads
+      - /tank/configs/arr-stack/radarr:/config
+      - /tank/data/media:/mnt/media
+      - /tank/data/media/downloads:/mnt/downloads
     depends_on:
       vpn:
         condition: service_started
@@ -288,9 +234,9 @@ services:
         max-size: "5M"
         max-file: "3"
     volumes:
-      - /data/configs/sonarr:/config
-      - /data/media:/mnt/media
-      - /data/media/Downloads:/mnt/downloads
+      - /tank/configs/arr-stack/sonarr:/config
+      - /tank/data/media:/mnt/media
+      - /tank/data/media/downloads:/mnt/downloads
     depends_on:
       vpn:
         condition: service_started
@@ -316,8 +262,8 @@ services:
         max-size: "5M"
         max-file: "3"
     volumes:
-      - /data/configs/bazarr:/config
-      - /data/media:/mnt/media
+      - /tank/configs/arr-stack/bazarr:/config
+      - /tank/data/media:/mnt/media
     depends_on:
       vpn:
         condition: service_started
@@ -333,30 +279,3 @@ services:
       start_period: 30s
       start_interval: 5s
     restart: always
-
-  kavita:
-    image: jvmilazz0/kavita:latest
-    container_name: kavita
-    networks:
-      - arr-stack
-    logging:
-      options:
-        max-size: "5M"
-        max-file: "3"
-    volumes:
-      - /data/books:/mnt/books
-      - /data/configs/kavita:/kavita/config
-    ports:
-      - "5000:5000"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Asia/Kolkata
-    restart: always
-
-networks:
-  arr-stack:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

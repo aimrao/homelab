@@ -1,36 +1,17 @@
 version: "3"
 services:
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - TZ=Asia/Kolkata
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_REMOVE_VOLUMES=true
-      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=jellyfin
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: unless-stopped
-
   jellyfin:
     image: jellyfin/jellyfin
     container_name: jellyfin
     ports:
       - "8096:8096"
     volumes:
-      - /data/config:/config
-      - /data/cache:/cache
-      - /data/movies:/movies
-      - /data/shows:/shows
-      - /data/events:/events
-      - /data/misc:/misc
+      - /tank/configs/jellyfin/config:/config
+      - /tank/configs/jellyfin/cache:/cache
+      - /tank/data/media/movies:/movies
+      - /tank/data/media/shows:/shows
+      - /tank/data/media/events:/events
+      - /tank/data/media/misc:/misc
     environment:
       - TZ=Asia/Kolkata
     logging:

@@ -1,32 +1,12 @@
 version: "3"
 services:
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - TZ=Asia/Kolkata
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_REMOVE_VOLUMES=true
-      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=homarr
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - WATCHTOWER_NOTIFICATION_URL=discord://token@webhookid
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    restart: unless-stopped
-
   homarr:
     container_name: homarr
     image: ghcr.io/ajnart/homarr:latest
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
-      - /opt/homarr/configs:/app/data/configs
-      - /opt/homarr/icons:/app/public/icons
-      - /opt/homarr/data:/data
+      - /tank/configs/homarr/configs:/app/data/configs
+      - /tank/configs/homarr/icons:/app/public/icons
+      - /tank/configs/homarr/data:/data
     ports:
       - "7575:7575"
     logging:

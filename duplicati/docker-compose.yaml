@@ -1,0 +1,21 @@
+version: "3"
+services:
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Kolkata
+      - SETTINGS_ENCRYPTION_KEY=[REDACTED]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - /tank/configs/duplicati:/config
+      - /tank/configs:/source
+    ports:
+      - 8200:8200
+    restart: unless-stopped
