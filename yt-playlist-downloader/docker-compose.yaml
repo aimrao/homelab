@@ -1,0 +1,18 @@
+version: "3"
+services:
+  yt-playlist-downloader:
+    image: 4imrao/yt-playlist-downloader
+    container_name: yt-playlist-downloader
+    volumes:
+      - /tank/data/media/yt:/data
+    environment:
+      - YOUTUBE_HANDLE=[REDACTED]
+      - YOUTUBE_API_KEY=[REDACTED]
+      - INTERVAL=86400
+      - THREAD_COUNT=5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
