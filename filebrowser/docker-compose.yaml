@@ -1,0 +1,21 @@
+version: "3"
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    container_name: filebrowser
+    environment:
+      - PUID=0
+      - PGID=0
+      - TZ=Asia/Kolkata
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - /tank/configs/filebrowser/filebrowser.db:/database/filebrowser.db
+      - /tank/configs/filebrowser/settings.json:/config/settings.json
+      - /tank:/tank
+    ports:
+      - 8080:80
+    restart: unless-stopped

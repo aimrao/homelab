@@ -1,0 +1,22 @@
+version: "3"
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:4.96.4
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - PASSWORD=[REDACTED]
+      - DEFAULT_WORKSPACE=/tank/code
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - /tank:/tank
+      - /tank/configs/code-server:/config
+    ports:
+      - 8443:8443
+    restart: unless-stopped
