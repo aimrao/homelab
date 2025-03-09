@@ -52,7 +52,7 @@ services:
       - 8989:8989 # Sonarr
       - 6767:6767 # Bazarr
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -79,7 +79,7 @@ services:
       vpn:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -134,7 +134,7 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -161,7 +161,7 @@ services:
       vpn:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -189,7 +189,7 @@ services:
       vpn:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -217,7 +217,7 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -245,7 +245,7 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
@@ -272,7 +272,7 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
     healthcheck:
-      test: ["CMD", "curl", "-fsL", "ipconfig.me"]
+      test: ["CMD", "curl", "ipconfig.io"]
       interval: 60s
       timeout: 5s
       retries: 3
