@@ -8,7 +8,7 @@ services:
       - PGID=1000
       - TZ=Asia/Kolkata
       - PASSWORD=[REDACTED]
-      - DEFAULT_WORKSPACE=/tank/code
+      - DEFAULT_WORKSPACE=/tank
     logging:
       driver: "json-file"
       options:
