@@ -122,8 +122,8 @@ services:
         max-file: "3"
     volumes:
       - /tank/configs/arr-stack/prowlarr:/config
-      - /tank/data/media:/mnt/media
-      - /tank/data/media/downloads:/mnt/downloads
+      - /tank/media:/mnt/media
+      - /tank/media/downloads:/mnt/downloads
     depends_on:
       vpn:
         condition: service_started
@@ -179,7 +179,7 @@ services:
         max-file: "3"
     volumes:
       - /tank/configs/arr-stack/qbittorrent:/config
-      - /tank/data/media/downloads:/mnt/downloads
+      - /tank/media/downloads:/mnt/downloads
     environment:
       - PUID=1000
       - PGID=1000
@@ -207,8 +207,8 @@ services:
         max-file: "3"
     volumes:
       - /tank/configs/arr-stack/radarr:/config
-      - /tank/data/media:/mnt/media
-      - /tank/data/media/downloads:/mnt/downloads
+      - /tank/media:/mnt/media
+      - /tank/media/downloads:/mnt/downloads
     depends_on:
       vpn:
         condition: service_started
@@ -235,8 +235,8 @@ services:
         max-file: "3"
     volumes:
       - /tank/configs/arr-stack/sonarr:/config
-      - /tank/data/media:/mnt/media
-      - /tank/data/media/downloads:/mnt/downloads
+      - /tank/media:/mnt/media
+      - /tank/media/downloads:/mnt/downloads
     depends_on:
       vpn:
         condition: service_started
@@ -252,7 +252,6 @@ services:
       start_period: 30s
       start_interval: 5s
     restart: always
-
   bazarr:
     image: linuxserver/bazarr:latest
     container_name: bazarr
@@ -263,7 +262,7 @@ services:
         max-file: "3"
     volumes:
       - /tank/configs/arr-stack/bazarr:/config
-      - /tank/data/media:/mnt/media
+      - /tank/media:/mnt/media
     depends_on:
       vpn:
         condition: service_started
