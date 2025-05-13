@@ -1,17 +1,14 @@
 version: "3"
 services:
   jellyfin:
-    image: jellyfin/jellyfin
+    image: ghcr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     ports:
       - "8096:8096"
     volumes:
       - /tank/configs/jellyfin/config:/config
       - /tank/configs/jellyfin/cache:/cache
-      - /tank/data/media/movies:/movies
-      - /tank/data/media/shows:/shows
-      - /tank/data/media/events:/events
-      - /tank/data/media/misc:/misc
+      - /tank/media:/media
     environment:
       - TZ=Asia/Kolkata
     logging:
