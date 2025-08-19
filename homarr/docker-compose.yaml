@@ -2,7 +2,7 @@ version: "3"
 services:
   homarr:
     container_name: homarr
-    image: ghcr.io/ajnart/homarr:latest
+    image: ghcr.io/homarr-labs/homarr:latest
     volumes:
       - /tank/configs/homarr/configs:/app/data/configs
       - /tank/configs/homarr/icons:/app/public/icons
