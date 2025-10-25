@@ -6,7 +6,7 @@ services:
     environment:
       - PUID=0
       - PGID=0
-      - TZ=Asia/Kolkat
+      - TZ=Asia/Kolkata
       - SECRET_ENCRYPTION_KEY=685e63b1d8241e881e7ca4dd2f66dff344d425a76843c75138a39d96e3406e93
     volumes:
       - /tank/configs/homarr/appdata:/appdata

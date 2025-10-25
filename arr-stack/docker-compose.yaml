@@ -2,22 +2,6 @@
 version: "3"
 
 services:
-  autoheal:
-    image: willfarrell/autoheal:1.2.0
-    container_name: autoheal
-    logging:
-      options:
-        max-size: "5M"
-        max-file: "3"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=all
-      - AUTOHEAL_INTERVAL=5
-      - AUTOHEAL_START_PERIOD=30
-      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=10
-    restart: always
-
   vpn:
     image: thrnz/docker-wireguard-pia
     container_name: vpn
@@ -35,7 +19,7 @@ services:
       - LOC=[REDACTED]
       - USER=[REDACTED]
       - PASS=[REDACTED]
-      - LOCAL_NETWORK=192.168.0.0/24
+      - LOCAL_NETWORK=100.64.0.0/10
       - PORT_FORWARDING=1
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
@@ -51,13 +35,6 @@ services:
       - 7878:7878 # Radarr
       - 8989:8989 # Sonarr
       - 6767:6767 # Bazarr
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   speedtest-vpn:
@@ -78,13 +55,6 @@ services:
     depends_on:
       vpn:
         condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   speedtest:
@@ -103,13 +73,6 @@ services:
       options:
         max-size: "5M"
         max-file: "3"
-    healthcheck:
-      test: "curl -I www.example.org 2>/dev/null | head -n 1 | cut -d$' ' -f2"
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   prowlarr:
@@ -133,13 +96,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   flaresolverr:
@@ -160,13 +116,6 @@ services:
     depends_on:
       vpn:
         condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   qbittorrent:
@@ -188,13 +137,6 @@ services:
     depends_on:
       vpn:
         condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   radarr:
@@ -216,13 +158,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
 
   sonarr:
@@ -244,14 +179,8 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
+
   bazarr:
     image: linuxserver/bazarr:latest
     container_name: bazarr
@@ -270,11 +199,4 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Kolkata
-    healthcheck:
-      test: ["CMD", "curl", "ipconfig.io"]
-      interval: 60s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-      start_interval: 5s
     restart: always
